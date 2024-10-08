@@ -1,0 +1,37 @@
+{
+    // General editor settings
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": false,
+
+    // Notebook settings
+    "notebook.formatOnSave.enabled": false,
+
+    // Default formatter settings
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+
+    // Language-specific settings
+    "[typescript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "[plaintext]": {
+        "editor.formatOnSave": false
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    },
+    "[javascriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    },
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    },
+    "[scss]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    }
+}
