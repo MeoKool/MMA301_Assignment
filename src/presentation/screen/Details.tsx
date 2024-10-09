@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { showInfoRemoveToast, showSuccessToast } from '../components/Toast';
 import { getFavorites, saveFavorites } from '../../utils/asyncStorage';
 import { Products } from '../../models/Products';
+import { Picker } from '@react-native-picker/picker';
 
 type RootStackParamList = {
     Details: { products: Products };
@@ -25,7 +26,10 @@ const DetailsScreen: React.FC<Props> = ({ route, navigation }) => {
     const { products } = route.params;
     const [favorites, setFavorites] = useState<Products[]>([]);
     const [isFavorite, setIsFavorite] = useState(false);
-
+    const [selectedRating, setSelectedRating] = useState(0);
+    const filteredComments = selectedRating === 0
+        ? products.comments
+        : products.comments.filter(comment => comment.rating === selectedRating);
     useEffect(() => {
         const loadFavoritesFromStorage = async () => {
             try {
@@ -38,7 +42,6 @@ const DetailsScreen: React.FC<Props> = ({ route, navigation }) => {
         };
         loadFavoritesFromStorage();
     }, []);
-
     const toggleFavorite = async () => {
         let updatedFavorites = [...favorites];
         if (isFavorite) {
@@ -79,6 +82,38 @@ const DetailsScreen: React.FC<Props> = ({ route, navigation }) => {
                     <Text style={styles.price}>GlassSurface: {products.glassSurface ? 'True' : 'False'}</Text>
                     <Text style={styles.price}>LimitedTimeDeal: {products.limitedTimeDeal}</Text>
                 </View>
+
+                <View style={styles.commentsSection}>
+                    <View style={styles.filterSection}>
+                        <Text style={styles.filterTitle}>Filter by Rating:</Text>
+                        <Picker
+                            selectedValue={selectedRating}
+                            style={styles.picker}
+                            onValueChange={(itemValue) => setSelectedRating(itemValue)}
+                        >
+                            <Picker.Item label="All Ratings" value={0} />
+                            <Picker.Item label="1 Star" value={1} />
+                            <Picker.Item label="2 Stars" value={2} />
+                            <Picker.Item label="3 Stars" value={3} />
+                            <Picker.Item label="4 Stars" value={4} />
+                            <Picker.Item label="5 Stars" value={5} />
+                        </Picker>
+                    </View>
+                    <View style={styles.commentsSection}>
+                        <Text style={styles.commentsTitle}>Customer Reviews:</Text>
+                        {filteredComments && filteredComments.length > 0 ? (
+                            filteredComments.map((comment, index) => (
+                                <View key={index} style={styles.commentContainer}>
+                                    <Text style={styles.commentAuthor}>{comment.author}:</Text>
+                                    <Text style={styles.commentContent}>{comment.content}</Text>
+                                    <Text style={styles.commentRating}>Rating: {comment.rating}/5</Text>
+                                </View>
+                            ))
+                        ) : (
+                            <Text style={styles.noComments}>No comments available.</Text>
+                        )}
+                    </View>
+                </View>
             </ScrollView>
         </SafeAreaView>
     );
@@ -89,10 +124,22 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#fff',
     },
+    picker: {
+        height: 50,
+        width: 150,
+    },
+    filterTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    filterSection: {
+        marginBottom: 16,
+    },
     scrollViewContent: {
         flexGrow: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        paddingBottom: 80,
     },
     name: {
         fontSize: 24,
@@ -122,6 +169,40 @@ const styles = StyleSheet.create({
         top: 40,
         right: 40,
         zIndex: 10,
+    },
+    commentsSection: {
+        width: '90%',
+        marginTop: 20,
+    },
+    commentsTitle: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    commentContainer: {
+        backgroundColor: '#f0f0f0',
+        padding: 15,
+        borderRadius: 10,
+        marginVertical: 8,
+    },
+    commentAuthor: {
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    commentContent: {
+        fontSize: 16,
+        marginTop: 5,
+        marginBottom: 10,
+    },
+    commentRating: {
+        fontSize: 14,
+        color: 'gray',
+    },
+    noComments: {
+        fontSize: 16,
+        fontStyle: 'italic',
+        color: 'gray',
+        textAlign: 'center',
     },
 });
 

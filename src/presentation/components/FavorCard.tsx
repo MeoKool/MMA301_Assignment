@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     },
     cardContent: {
         flex: 1,
-        marginLeft: 16,
+        marginLeft: 60,
     },
     name: {
         fontSize: 16,
