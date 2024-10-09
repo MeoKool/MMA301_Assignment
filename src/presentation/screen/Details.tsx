@@ -9,6 +9,7 @@ import { showInfoRemoveToast, showSuccessToast } from '../components/Toast';
 import { getFavorites, saveFavorites } from '../../utils/asyncStorage';
 import { Products } from '../../models/Products';
 import { Picker } from '@react-native-picker/picker';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 type RootStackParamList = {
     Details: { products: Products };
@@ -77,7 +78,7 @@ const DetailsScreen: React.FC<Props> = ({ route, navigation }) => {
                     </TouchableOpacity>
                     <Text style={styles.name}>{products.artName}</Text>
                     <Text style={styles.price}>Price: {products.price}$</Text>
-                    <Text style={styles.price}>{products.description}</Text>
+                    <Text style={styles.description}>{products.description}</Text>
                     <Text style={styles.price}>Brand: {products.brand}</Text>
                     <Text style={styles.price}>GlassSurface: {products.glassSurface ? 'True' : 'False'}</Text>
                     <Text style={styles.price}>LimitedTimeDeal: {products.limitedTimeDeal}</Text>
@@ -104,9 +105,14 @@ const DetailsScreen: React.FC<Props> = ({ route, navigation }) => {
                         {filteredComments && filteredComments.length > 0 ? (
                             filteredComments.map((comment, index) => (
                                 <View key={index} style={styles.commentContainer}>
-                                    <Text style={styles.commentAuthor}>{comment.author}:</Text>
+                                    <Text style={styles.commentAuthor}>
+        <Icon name="user" size={16} color="#000" /> {comment.author}:
+    </Text>
                                     <Text style={styles.commentContent}>{comment.content}</Text>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                     <Text style={styles.commentRating}>Rating: {comment.rating}/5</Text>
+                                    <Text style={styles.commentRating}><Icon name="star" size={16} color="#FFD700"></Icon></Text>
+                                    </View>
                                 </View>
                             ))
                         ) : (
@@ -144,6 +150,12 @@ const styles = StyleSheet.create({
     name: {
         fontSize: 24,
         fontWeight: 'bold',
+    },
+    description:{
+           fontSize: 20,
+        marginVertical: 8,
+        marginLeft: 19,
+        marginRight: 19,
     },
     price: {
         fontSize: 20,

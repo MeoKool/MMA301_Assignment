@@ -30,7 +30,7 @@
     "react-native-swipe-list-view": "^3.2.9",
     "react-native-tab-view": "^3.5.2",
     "react-native-toast-message": "^2.2.0",
-    "react-native-vector-icons": "^10.1.0",
+    "react-native-vector-icons": "^10.2.0",
     "react-native-web": "~0.19.10"
   },
   "devDependencies": {
