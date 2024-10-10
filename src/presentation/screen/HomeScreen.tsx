@@ -1,22 +1,22 @@
 import { useIsFocused } from "@react-navigation/native";
 import { useEffect, useState } from "react";
-import { FlatList, SafeAreaView, Text, View, StyleSheet } from "react-native"
+import { FlatList, SafeAreaView, Text, View, StyleSheet, ActivityIndicator } from "react-native";
 import { Products } from "../../models/Products";
 import { PlayerAPI } from "../../api/PlayerAPI";
 import { getFavorites, saveFavorites } from "../../utils/asyncStorage";
 import { showInfoRemoveToast, showSuccessToast } from "../components/Toast";
 import CategoryFilter from "../components/CategoryFilter";
 import ProductCard from "../components/ProductCard";
+import Search from "../components/Sreach";
 
 const HomeScreen: React.FC = () => {
     const [product, setProduct] = useState<Products[]>([]);
     const [filteredPlayer, setFilteredPlayer] = useState<Products[]>([]);
     const [favorites, setFavorites] = useState<Products[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
     const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState<string>('');
     const isFocused = useIsFocused();
-
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -24,11 +24,12 @@ const HomeScreen: React.FC = () => {
             try {
                 const data = await api.getAllPlayer();
                 setProduct(data);
-                setFilteredPlayer(data);
+                setFilteredPlayer(data); // Hiển thị toàn bộ sản phẩm ban đầu
+                setLoading(false);
             } catch (err) {
-                console.log('Error fetching perfumes', err);
+                console.log('Error fetching products', err);
+                setLoading(false);
             }
-
         };
 
         const loadFavorites = async () => {
@@ -45,12 +46,17 @@ const HomeScreen: React.FC = () => {
     }, [isFocused]);
 
     useEffect(() => {
-        if (selectedTeam) {
-            setFilteredPlayer(product.filter(product => product.brand === selectedTeam));
-        } else {
-            setFilteredPlayer(product);
+        // Mỗi khi searchQuery hoặc selectedTeam thay đổi, cập nhật danh sách filteredPlayer
+        let filtered = selectedTeam ? product.filter((item) => item.brand === selectedTeam) : product;
+
+        if (searchQuery.trim()) {
+            filtered = filtered.filter((item) =>
+                item.artName.toLowerCase().includes(searchQuery.toLowerCase())
+            );
         }
-    }, [selectedTeam, product]);
+
+        setFilteredPlayer(filtered); // Cập nhật danh sách sản phẩm dựa vào searchQuery và selectedTeam
+    }, [selectedTeam, product, searchQuery]); // Thêm cả product vào dependency để cập nhật khi dữ liệu thay đổi
 
     const toggleFavorite = async (product: Products) => {
         let updatedFavorites = [...favorites];
@@ -65,44 +71,56 @@ const HomeScreen: React.FC = () => {
         await saveFavorites(updatedFavorites);
     };
 
-    const isFavorite = (perfumeId: string) => {
+    const isFavorite = (productId: string) => {
         try {
-            return favorites.findIndex(fav => fav.id === perfumeId) !== -1;
+            return favorites.findIndex(fav => fav.id === productId) !== -1;
         } catch (error) {
             console.log('Error checking favorite', error);
             return false;
         }
     };
 
-
-
-
-    const team = Array.from(new Set(product.map(perfume => perfume.brand)));
+    const team = Array.from(new Set(product.map(item => item.brand)));
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={{ alignItems: 'center' }}>
-                <Text style={styles.header}>Products</Text>
-            </View>
-            <CategoryFilter
-                team={team}
-                selectedTeam={selectedTeam}
-                onSelectTeam={setSelectedTeam}
-            />
-            <FlatList
-                data={filteredPlayer}
-                showsVerticalScrollIndicator={false}
-                numColumns={2}
-                renderItem={({ item }) => (
-                    <ProductCard
-                        product={item}
-                        favorite={isFavorite(item.id)}
-                        onChangeFavList={() => toggleFavorite(item)}
-                    />
-                )}
-                keyExtractor={(item) => item.id.toString()}
-                contentContainerStyle={styles.list}
-            />
+            {loading ? (
+                <ActivityIndicator size="large" color="#007BFF" style={styles.loader} />
+            ) : (
+                <FlatList
+                    data={filteredPlayer}
+                    showsVerticalScrollIndicator={false}
+                    numColumns={2}
+                    ListHeaderComponent={
+                        <>
+                            <View style={styles.headerContainer}>
+                                <Text style={styles.headerText}>Products</Text>
+                            </View>
+                            <View style={styles.searchContainer}>
+                                <Search
+                                    artNames={product.map(p => p.artName)}
+                                    onSelectArt={(query) => setSearchQuery(query)}
+                                    onSearchChange={(query) => setSearchQuery(query)} 
+                                />
+                            </View>
+                            <CategoryFilter
+                                team={team}
+                                selectedTeam={selectedTeam}
+                                onSelectTeam={setSelectedTeam}
+                            />
+                        </>
+                    }
+                    renderItem={({ item }) => (
+                        <ProductCard
+                            product={item}
+                            favorite={isFavorite(item.id)}
+                            onChangeFavList={() => toggleFavorite(item)}
+                        />
+                    )}
+                    keyExtractor={(item) => item.id.toString()}
+                    contentContainerStyle={styles.list}
+                />
+            )}
         </SafeAreaView>
     );
 };
@@ -110,26 +128,30 @@ const HomeScreen: React.FC = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f0f0f0',
-        marginBottom: 64,
+        backgroundColor: '#f7f8fa',
     },
-    header: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        marginTop: 20,
-        marginBottom: 30,
+    headerContainer: {
+        alignItems: 'center',
+        marginVertical: 20,
+    },
+    headerText: {
+        fontSize: 28,
+        fontWeight: '600',
+        color: '#333',
+    },
+    searchContainer: {
+        marginHorizontal: 16,
+        marginVertical: 10,
+     
     },
     list: {
-        flexGrow: 1,
-        paddingHorizontal: 3,
+        paddingHorizontal: 8,
         paddingTop: 10,
-        paddingBottom: 30,
-        backgroundColor: '#96C9F4',
+        paddingBottom: 90, // Thêm padding để tránh bị che bởi bottom navbar
+        justifyContent: 'center',
     },
-    centeredText: {
-        flex: 1,
-        textAlign: 'center',
-        textAlignVertical: 'center',
+    loader: {
+        marginTop: 20,
     },
 });
 

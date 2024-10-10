@@ -1,5 +1,5 @@
 // CategoryFilter.tsx
-import React from 'react';
+import React, { memo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 
 interface CategoryFilterProps {
@@ -15,6 +15,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ team, selectedTeam, onS
                 horizontal
                 data={['All', ...team]}
                 keyExtractor={(item) => item}
+                showsHorizontalScrollIndicator={false}
                 renderItem={({ item }) => (
                     <TouchableOpacity
                         style={[
@@ -22,8 +23,18 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ team, selectedTeam, onS
                             selectedTeam === item || (selectedTeam === null && item === 'All') ? styles.selected : {},
                         ]}
                         onPress={() => onSelectTeam(item === 'All' ? null : item)}
+                        accessibilityLabel={`Select ${item}`}
                     >
-                        <Text style={styles.buttonText}>{item}</Text>
+                        <Text
+                            style={[
+                                styles.buttonText,
+                                selectedTeam === item || (selectedTeam === null && item === 'All')
+                                    ? styles.selectedText
+                                    : {},
+                            ]}
+                        >
+                            {item}
+                        </Text>
                     </TouchableOpacity>
                 )}
             />
@@ -31,6 +42,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ team, selectedTeam, onS
     );
 };
 
+// StyleSheet updated with more refined styles
 const styles = StyleSheet.create({
     container: {
         paddingVertical: 10,
@@ -42,13 +54,18 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         marginHorizontal: 5,
         backgroundColor: '#f0f0f0',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     selected: {
-        backgroundColor: '#39B78D',
+        backgroundColor: '#32CD32',
     },
     buttonText: {
         color: '#333',
     },
+    selectedText: {
+        color: '#fff',
+    },
 });
 
-export default CategoryFilter;
+export default memo(CategoryFilter);

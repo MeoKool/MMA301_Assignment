@@ -83,9 +83,10 @@ const styles = StyleSheet.create({
         color: 'gray',
     },
     image: {
-        width: 80,
-        height: 80,
+        width: 100,
+        height: 200,
         borderRadius: 8,
+        objectFit: 'contain',
     },
     fav: {
         position: 'absolute',

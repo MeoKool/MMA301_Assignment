@@ -26,7 +26,18 @@ const Stack = createStackNavigator<RootStackParamList>();
 const HomeStackNavigator: React.FC = () => {
     return (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen 
+        name="Home" 
+        component={HomeScreen}  
+        options={({ route }) => ({
+            title: route.name === 'Home' ? 'Products' : route.name,
+            headerStyle: {
+                backgroundColor: '#fff',
+            },
+            headerTintColor: '#000',
+            headerTitleAlign: 'center',
+        })}
+    />
             <Stack.Screen name="Details" component={DetailsScreen} />
         </Stack.Navigator>
     );
