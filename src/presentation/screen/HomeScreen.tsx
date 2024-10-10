@@ -1,4 +1,4 @@
-import { useIsFocused } from "@react-navigation/native";
+import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import { FlatList, SafeAreaView, Text, View, StyleSheet, ActivityIndicator } from "react-native";
 import { Products } from "../../models/Products";
@@ -17,6 +17,7 @@ const HomeScreen: React.FC = () => {
     const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState<string>('');
     const isFocused = useIsFocused();
+    const navigation = useNavigation();
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -57,6 +58,16 @@ const HomeScreen: React.FC = () => {
 
         setFilteredPlayer(filtered); // Cập nhật danh sách sản phẩm dựa vào searchQuery và selectedTeam
     }, [selectedTeam, product, searchQuery]); // Thêm cả product vào dependency để cập nhật khi dữ liệu thay đổi
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            setSelectedTeam(null);
+            setSearchQuery('');
+            setFilteredPlayer(product);
+        });
+
+        return unsubscribe;
+    }, [navigation, product]);
 
     const toggleFavorite = async (product: Products) => {
         let updatedFavorites = [...favorites];

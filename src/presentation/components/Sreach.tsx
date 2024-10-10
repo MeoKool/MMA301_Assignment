@@ -1,59 +1,81 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, FlatList, TouchableOpacity, Keyboard } from 'react-native';
-import { Ionicons } from '@expo/vector-icons'; // Cần thư viện này để sử dụng icon (npm install @expo/vector-icons)
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, StyleSheet, FlatList, TouchableOpacity, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { getSearchHistory, saveSearchHistory, removeFromSearchHistory, removeAllSearchHistory } from '../../utils/asyncStorage';
 
 interface SearchArtNameProps {
   artNames: string[];
   onSelectArt: (artName: string) => void;
-  onSearchChange: (query: string) => void; 
+  onSearchChange: (query: string) => void;
 }
 
 const Search: React.FC<SearchArtNameProps> = ({ artNames, onSelectArt, onSearchChange }) => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [filteredArtNames, setFilteredArtNames] = useState<string[]>([]);
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [isInputFocused, setIsInputFocused] = useState<boolean>(false);
 
-  // Hàm xử lý khi người dùng nhập từ khóa tìm kiếm
-  const handleSearch = (query: string) => {
+  useEffect(() => {
+    const loadSearchHistory = async () => {
+      const history = await getSearchHistory();
+      setSearchHistory(history);
+    };
+    loadSearchHistory();
+  }, []);
+
+  const handleSearch = async (query: string) => {
     setSearchQuery(query);
-    onSearchChange(query); // Gọi callback để cập nhật danh sách sản phẩm trong component cha
+    onSearchChange(query);
+    setIsInputFocused(false); 
 
     if (query.trim()) {
-      const filtered = artNames.filter((art) =>
-        art.toLowerCase().includes(query.toLowerCase())
-      );
+      const filtered = artNames.filter((art) => art.toLowerCase().includes(query.toLowerCase()));
       setFilteredArtNames(filtered);
     } else {
       setFilteredArtNames([]);
     }
   };
 
-  // Hàm xử lý khi người dùng chọn một mục
-  const handleSelectArt = (artName: string) => {
-    setSearchQuery(artName); // Cập nhật ô tìm kiếm với tên đã chọn
-    setFilteredArtNames([]); // Ẩn danh sách sau khi chọn
-    onSelectArt(artName); // Gọi callback để truyền tên đã chọn lên component cha
-    Keyboard.dismiss(); // Ẩn bàn phím sau khi chọn
+  const handleSelectArt = async (artName: string) => {
+    setSearchQuery(artName);
+    setFilteredArtNames([]);
+    onSelectArt(artName);
+
+    const updatedHistory = await saveSearchHistory(artName);
+    setSearchHistory(updatedHistory);
+    setIsInputFocused(false);
+
+    Keyboard.dismiss();
   };
 
-  // Hàm xóa nội dung trong ô tìm kiếm
   const clearSearch = () => {
     setSearchQuery('');
     setFilteredArtNames([]);
-    onSearchChange(''); // Gọi callback để cập nhật danh sách sản phẩm đầy đủ trong component cha
+    onSearchChange('');
+    setIsInputFocused(true);
+  };
+
+  const handleDeleteHistoryItem = async (item: string) => {
+    const updatedHistory = await removeFromSearchHistory(item);
+    setSearchHistory(updatedHistory);
+  };
+
+  const handleClearAllHistory = async () => {
+    await removeAllSearchHistory();
+    setSearchHistory([]);
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.searchWrapper}>
-        {/* Thanh tìm kiếm */}
         <TextInput
           style={styles.searchInput}
           placeholder="Search art name..."
           value={searchQuery}
           onChangeText={handleSearch}
           placeholderTextColor="#999"
+          onFocus={() => setIsInputFocused(true)}
         />
-        {/* Nút xóa nhanh */}
         {searchQuery !== '' && (
           <TouchableOpacity style={styles.clearButton} onPress={clearSearch}>
             <Ionicons name="close-circle" size={20} color="#999" />
@@ -61,7 +83,31 @@ const Search: React.FC<SearchArtNameProps> = ({ artNames, onSelectArt, onSearchC
         )}
       </View>
 
-      {/* Hiển thị danh sách các tên tác phẩm nghệ thuật đã lọc */}
+      {isInputFocused && searchQuery.trim() === '' && searchHistory.length > 0 && (
+        <>
+          <View style={styles.historyHeader}>
+            <Text style={styles.historyHeaderText}>History Search</Text>
+            <TouchableOpacity onPress={handleClearAllHistory}>
+              <Text style={styles.clearAllText}>Clear all history</Text>
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            data={searchHistory}
+            keyExtractor={(item) => item}
+            renderItem={({ item }) => (
+              <View style={styles.historyItemContainer}>
+                <TouchableOpacity style={styles.listItem} onPress={() => handleSelectArt(item)}>
+                  <Text style={styles.itemText}>{item}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => handleDeleteHistoryItem(item)}>
+                  <Ionicons name="close-circle" size={20} color="#999" />
+                </TouchableOpacity>
+              </View>
+            )}
+          />
+        </>
+      )}
+
       {searchQuery.trim() !== '' && (
         <FlatList
           data={filteredArtNames}
@@ -82,10 +128,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f7f8fa',
     borderRadius: 20,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 3.84,
     elevation: 2,
@@ -97,7 +140,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     height: 40,
-    flex: 1, 
+    flex: 1,
     borderColor: '#ddd',
     borderWidth: 1,
     borderRadius: 25,
@@ -105,32 +148,45 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     fontSize: 16,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.22,
     shadowRadius: 2.22,
     elevation: 2,
   },
   clearButton: {
-    color: '#000',
     position: 'absolute',
-    right: 10, // Đặt vị trí của nút ở góc phải của TextInput
+    right: 10,
   },
-  listItem: {
+  historyHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
     paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  historyHeaderText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  clearAllText: {
+    fontSize: 14,
+    color: '#007BFF',
+  },
+  historyItemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
+  listItem: {
+    paddingVertical: 10,
+  },
   itemText: {
     fontSize: 16,
-  },
-  emptyText: {
-    marginTop: 20,
-    textAlign: 'center',
-    color: '#aaa',
   },
 });
 

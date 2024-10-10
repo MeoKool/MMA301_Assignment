@@ -74,9 +74,9 @@ const DetailsScreen: React.FC<Props> = ({ route, navigation }) => {
           <View style={styles.productInfo}>
             <Text style={styles.name}>{products.artName}</Text>
             <Text style={styles.price}>${products.price}</Text>
-            <Text style={styles.description}>{products.description}</Text>
             <Text style={styles.details}>Brand: {products.brand}</Text>
             <Text style={styles.details}>Glass Surface: {products.glassSurface ? 'Yes' : 'No'}</Text>
+            <Text style={styles.description}>{products.description}</Text>
             <Text style={styles.limitedTimeDeal}>Limited Time Deal: {products.limitedTimeDeal * 100}% Off</Text>
           </View>
         </View>
