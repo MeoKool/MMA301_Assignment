@@ -111,14 +111,14 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         overflow: 'hidden',
         flexShrink: 1,
-        width: 140, // Giới hạn chiều rộng của tên sản phẩm
+        width: 140, 
     },
     price: {
-        fontSize: 20,
-        fontWeight: '600',
-        color: '#1E90FF',
-        marginVertical: 4,
-    },
+    fontSize: 20,
+    fontWeight: 'bold', 
+    color: '#1E90FF',
+    marginVertical: 4,
+},
     brand: {
         fontSize: 12,
         color: '#8A8A8A',

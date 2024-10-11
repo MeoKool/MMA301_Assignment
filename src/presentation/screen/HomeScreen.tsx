@@ -14,18 +14,17 @@ const HomeScreen: React.FC = () => {
     const [filteredPlayer, setFilteredPlayer] = useState<Products[]>([]);
     const [favorites, setFavorites] = useState<Products[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
+    const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState<string>('');
     const isFocused = useIsFocused();
     const navigation = useNavigation();
-
     useEffect(() => {
         const fetchProduct = async () => {
             const api = new PlayerAPI();
             try {
                 const data = await api.getAllPlayer();
                 setProduct(data);
-                setFilteredPlayer(data); // Hiển thị toàn bộ sản phẩm ban đầu
+                setFilteredPlayer(data); 
                 setLoading(false);
             } catch (err) {
                 console.log('Error fetching products', err);
@@ -47,8 +46,7 @@ const HomeScreen: React.FC = () => {
     }, [isFocused]);
 
     useEffect(() => {
-        // Mỗi khi searchQuery hoặc selectedTeam thay đổi, cập nhật danh sách filteredPlayer
-        let filtered = selectedTeam ? product.filter((item) => item.brand === selectedTeam) : product;
+        let filtered = selectedBrand ? product.filter((item) => item.brand === selectedBrand) : product;
 
         if (searchQuery.trim()) {
             filtered = filtered.filter((item) =>
@@ -56,14 +54,14 @@ const HomeScreen: React.FC = () => {
             );
         }
 
-        setFilteredPlayer(filtered); // Cập nhật danh sách sản phẩm dựa vào searchQuery và selectedTeam
-    }, [selectedTeam, product, searchQuery]); // Thêm cả product vào dependency để cập nhật khi dữ liệu thay đổi
+        setFilteredPlayer(filtered); 
+    }, [selectedBrand, product, searchQuery]); 
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
-            setSelectedTeam(null);
-            setSearchQuery('');
+            setSelectedBrand(null);
             setFilteredPlayer(product);
+            setSearchQuery('');
         });
 
         return unsubscribe;
@@ -116,8 +114,8 @@ const HomeScreen: React.FC = () => {
                             </View>
                             <CategoryFilter
                                 team={team}
-                                selectedTeam={selectedTeam}
-                                onSelectTeam={setSelectedTeam}
+                                selectedBrand={selectedBrand}
+                                onSelectBrand={setSelectedBrand}
                             />
                         </>
                     }
@@ -158,7 +156,7 @@ const styles = StyleSheet.create({
     list: {
         paddingHorizontal: 8,
         paddingTop: 10,
-        paddingBottom: 90, // Thêm padding để tránh bị che bởi bottom navbar
+        paddingBottom: 90,
         justifyContent: 'center',
     },
     loader: {

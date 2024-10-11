@@ -70,18 +70,21 @@ const styles = StyleSheet.create({
         marginLeft: 60,
     },
     name: {
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+  },
     price: {
-        fontSize: 14,
-        color: 'gray',
-        marginVertical: 4,
-    },
-    brand: {
-        fontSize: 14,
-        color: 'gray',
-    },
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#1E90FF',
+    marginBottom: 5,
+  },
+     brand: {
+    fontSize: 16,
+    color: '#666',
+  },
     image: {
         width: 100,
         height: 200,

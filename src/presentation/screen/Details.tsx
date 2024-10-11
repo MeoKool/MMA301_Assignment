@@ -172,6 +172,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     color: '#007BFF',
     marginVertical: 8,
+    fontWeight: 'bold',
   },
   description: {
     fontSize: 18,

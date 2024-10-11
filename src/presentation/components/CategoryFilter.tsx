@@ -1,14 +1,14 @@
 // CategoryFilter.tsx
-import React, { memo } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 
 interface CategoryFilterProps {
     team: string[];
-    selectedTeam: string | null;
-    onSelectTeam: (team: string | null) => void;
+    selectedBrand: string | null;
+    onSelectBrand: (product: string | null) => void;
 }
 
-const CategoryFilter: React.FC<CategoryFilterProps> = ({ team, selectedTeam, onSelectTeam }) => {
+const CategoryFilter: React.FC<CategoryFilterProps> = ({ team, selectedBrand, onSelectBrand }) => {
     return (
         <View style={styles.container}>
             <FlatList
@@ -20,15 +20,15 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ team, selectedTeam, onS
                     <TouchableOpacity
                         style={[
                             styles.button,
-                            selectedTeam === item || (selectedTeam === null && item === 'All') ? styles.selected : {},
+                            selectedBrand === item || (selectedBrand === null && item === 'All') ? styles.selected : {},
                         ]}
-                        onPress={() => onSelectTeam(item === 'All' ? null : item)}
+                        onPress={() => onSelectBrand(item === 'All' ? null : item)}
                         accessibilityLabel={`Select ${item}`}
                     >
                         <Text
                             style={[
                                 styles.buttonText,
-                                selectedTeam === item || (selectedTeam === null && item === 'All')
+                                selectedBrand === item || (selectedBrand === null && item === 'All')
                                     ? styles.selectedText
                                     : {},
                             ]}
@@ -68,4 +68,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default memo(CategoryFilter);
+export default CategoryFilter;
